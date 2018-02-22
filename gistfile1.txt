@@ -2,38 +2,72 @@ import pygame
 import os, sys
 from pygame.locals import*
 
-img = pygame.image.load('ufo.png')
 
 pygame.init()
-screen = pygame.display.set_mode((800, 700))
+screen = pygame.display.set_mode((800, 600)) ### creates screen
 done = False
-is_blue = True
-x = 30
-y = 30
 
-clock = pygame.time.Clock()
+clock = pygame.time.Clock() # makes a constant fps of 60
+
+
+ufo = pygame.image.load("ufo.png")      ### ufo image
+beam = pygame.image.load("beam.png")    ### beam image
+
+### lowers opacity of beam ###
+def blit_alpha(target, source, location, opacity):
+        xl = location[0]
+        yl = location[1]
+        temp = pygame.Surface((source.get_width(), source.get_height())).convert()
+        temp.blit(target, (x, by))
+        temp.blit(source, (0, 0))
+        temp.set_alpha(opacity)
+        target.blit(temp, location)
+
+### initial pos of ufo ###
+x = 100
+y = 100
+
+### y pos of beam ###
+by = 150
+
+
+#### RUNS PROGRAM UNTIL QUIT ####
 
 while not done:
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                         done = True
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                        is_blue = not is_blue
+
+###### MOVES UFO and BEAM : ######
 
         pressed = pygame.key.get_pressed()
-        # if pressed[pygame.K_UP]: y -= 3
-        # if pressed[pygame.K_DOWN]: y += 3
-        if pressed[pygame.K_LEFT]: x -= 3
-        if pressed[pygame.K_RIGHT]: x += 3
+        ## if pressed[pygame.K_UP]: y -= 3
+        ## if pressed[pygame.K_DOWN]: y += 3
+        if pressed[pygame.K_LEFT]: x -= 3   ### left arrow key moves left
+        if pressed[pygame.K_RIGHT]: x += 3  ### right arrow key moves right
 
-        screen.blit(img,(0,0))
         screen.fill((0, 0, 0))
-        if is_blue: color = (0, 128, 255)
-        else: color = (255, 100, 0)
-        # pygame.draw.rect(screen, color, pygame.Rect(x, y, 60, 60))
 
-        pygame.display.flip()
-        clock.tick(60)
-        
-        #KEYDOWN to move UFO
-        #KEYUP : update variable when key let go
+        # s = pygame.Surface((1000,750))
+        # s.set_alpha(50)
+        # s.fill((0,255,0,128))
+
+        ### resizes ufo and beam ###
+        ufo = pygame.transform.scale(ufo, (100, 50))
+        beam = pygame.transform.scale(beam, (100, 50))
+
+        ### prints images on screen ###
+        screen.blit(ufo,(x,y))
+        blit_alpha(screen, beam, (x, by), 80)
+
+        pygame.display.flip()       # creates display
+        clock.tick(60)              # sets fps
+        pygame.display.update()     # updates display
+
+
+
+
+
+        ### NOTES ###
+        # KEYDOWN : move UFO
+        # KEYUP : update variable when key let go
