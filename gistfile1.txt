@@ -34,3 +34,6 @@ while not done:
 
         pygame.display.flip()
         clock.tick(60)
+        
+        #KEYDOWN to move UFO
+        #KEYUP : update variable when key let go
