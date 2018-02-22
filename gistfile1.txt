@@ -2,74 +2,73 @@ import pygame
 import os, sys
 from pygame.locals import*
 
+#### MAIN FUNCTION THAT RUNS THE GAME ####
+def main():
 
-pygame.init()
-screen = pygame.display.set_mode((800, 600)) ### creates screen
-done = False
+    pygame.init()
+    screen = pygame.display.set_mode((800, 600)) ### creates screen
+    done = False
 
-clock = pygame.time.Clock() # makes a constant fps of 60
-
-
-ufo = pygame.image.load("ufo.png")      ### ufo image
-beam = pygame.image.load("beam.png")    ### beam image
-
-### lowers opacity of beam ###
-def blit_alpha(target, source, location, opacity):
-        xl = location[0]
-        yl = location[1]
-        temp = pygame.Surface((source.get_width(), source.get_height())).convert()
-        temp.blit(target, (x, by))
-        temp.blit(source, (0, 0))
-        temp.set_alpha(opacity)
-        target.blit(temp, location)
-
-### initial pos of ufo ###
-x = 100
-y = 100
-
-### y pos of beam ###
-by = 150
+    clock = pygame.time.Clock() # makes a constant fps of 60
 
 
-#### RUNS PROGRAM UNTIL QUIT ####
+    ufo = pygame.image.load("ufo.png")      ### ufo image
+    beam = pygame.image.load("beam.png")    ### beam image
 
-while not done:
-        for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                        done = True
+    ### lowers opacity of beam ###
+    def blit_alpha(target, source, location, opacity):
+            xl = location[0]
+            yl = location[1]
+            temp = pygame.Surface((source.get_width(), source.get_height())).convert()
+            temp.blit(target, (x, by))
+            temp.blit(source, (0, 0))
+            temp.set_alpha(opacity)
+            target.blit(temp, location)
 
-###### MOVES UFO and BEAM : ######
+    ### initial pos of ufo ###
+    x = 100
+    y = 100
 
-        pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_LEFT]:
-            if x==100: x=x      ### left bound
-            else: x -= 4        ### left arrow key moves left
-        if pressed[pygame.K_RIGHT]:
-            if x==600: x = x    ### right bound
-            else: x += 4        ### right arrow key moves right
+    ### y pos of beam ###
+    by = 150
 
-        screen.fill((0, 0, 0))
+    ###### RUNS PROGRAM UNTIL QUIT ######
 
-        # s = pygame.Surface((1000,750))
-        # s.set_alpha(50)
-        # s.fill((0,255,0,128))
+    while not done:
+            for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                            done = True
 
-        ### resizes ufo and beam ###
-        ufo = pygame.transform.scale(ufo, (100, 50))
-        beam = pygame.transform.scale(beam, (100, 50))
+    ###### MOVES UFO and BEAM : ######
 
-        ### prints images on screen ###
-        screen.blit(ufo,(x,y))
-        blit_alpha(screen, beam, (x, by), 80)
+            pressed = pygame.key.get_pressed()
+            if pressed[pygame.K_LEFT]:
+                if x==100: x=x      ### left bound
+                else: x -= 4        ### left arrow key moves left
+            if pressed[pygame.K_RIGHT]:
+                if x==600: x = x    ### right bound
+                else: x += 4        ### right arrow key moves right
 
-        pygame.display.flip()       # creates display
-        clock.tick(60)              # sets fps
-        pygame.display.update()     # updates display
+            ### makes background black ###
+            screen.fill((0, 0, 0))
+
+            ### resizes ufo and beam ###
+            ufo = pygame.transform.scale(ufo, (100, 50))
+            beam = pygame.transform.scale(beam, (100, 200))
+
+            ### prints images on screen ###
+            screen.blit(ufo,(x,y))
+            screen.blit(ufo,(400,325))
+            blit_alpha(screen, beam, (x, by), 80)
+
+            pygame.display.flip()       # creates display
+            clock.tick(240)              # sets fps
+            pygame.display.update()     # updates display
 
 
+### starts game ###
+main()
 
-
-
-        ### NOTES ###
-        # KEYDOWN : move UFO
-        # KEYUP : update variable when key let go
+		### NOTES ###
+		# KEYDOWN : move UFO
+		# KEYUP : update variable when key let go
