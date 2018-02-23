@@ -146,9 +146,9 @@ def moveUFO():
             bx += 43                            ### right arrow key moves right
 
 
+    moveCow() # moves cow with beam
 
-    ### prints ufo and beam on screen ###
-    moveCow()                   # moves cow with beam
+        ### prints ufo and beam on screen ###
     screen.blit(ufo,(x,y))
     if cy > -319:
         screen.blit(beam,(bx,by))
@@ -183,7 +183,7 @@ def initShiningStars():
     global whiteStars
     whiteStars = pygame.image.load("whitestars.png")
 
-#### end initShiningStars
+#### end initShiningStars ####
 
 
 #### SHINING STARS ####
@@ -215,6 +215,9 @@ def collectEMG():
 
     minAct = min(actLevels)
     maxAct = max(actLevels)
+
+    ### initialize target with first max
+    ### first max at about 100 seconds
 
     global actNorm
     actNorm = []
