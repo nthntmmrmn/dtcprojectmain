@@ -5,20 +5,25 @@ from pygame.locals import*
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location):
-        pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
+        pygame.sprite.Sprite.__init__(self)  # call Sprite initializer
         self.image = pygame.image.load(image_file)
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
 
-#### MAIN FUNCTION THAT RUNS THE GAME ####
+# MAIN FUNCTION THAT RUNS THE GAME
 def main():
     pygame.init()
     global screen
-    screen = pygame.display.set_mode((1000, 600)) ### creates screen
+    print(pygame.display.Info())
+    infoObject = pygame.display.Info()
+    screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h))
+    # screen = pygame.display.set_mode((1000, 600)) # creates screen
     global done
     done = False
     clock = pygame.time.Clock()     # makes a constant fps of 60
-    clock.tick(60)                 # sets fps
+    clock.tick(60)                  # sets fps
+
+
 
     global iterator
     iterator = 0
@@ -32,7 +37,7 @@ def main():
     collectEMG()
     global actNorm
 
-        ###### RUNS PROGRAM UNTIL QUIT ######
+    # RUNS PROGRAM UNTIL QUIT
     while not done:
             for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -53,18 +58,18 @@ def main():
             pygame.display.flip()       # creates display
             pygame.display.update()     # updates display
 
-#### end main() ####
+# end main() #
 
 
-#### INITIALIZES UFO, BEAM, AND COW####
+# INITIALIZES UFO, BEAM, AND COW
 def initUFO():
-    global x    ### initial pos of ufo
+    global x    # initial pos of ufo
     global y
 
     x = 172
     y = 100
 
-    global by   ### init pos of beam and cow
+    global by   # init pos of beam and cow
     global bx
     global cy
 
@@ -73,24 +78,24 @@ def initUFO():
     cy = -185
 
     global ufo
-    ufo = pygame.image.load("ufo.png")      ### ufo image
+    ufo = pygame.image.load("ufo.png")      # ufo image
     global beam
-    beam = pygame.image.load("beam.png")    ### beam image
+    beam = pygame.image.load("beam.png")    # beam image
     global cow
-    cow = pygame.image.load("cow.png")      ### cow image
+    cow = pygame.image.load("cow.png")      # cow image
 
 
-    ### resizes ufo and beam, rotates cow ###
+    # resizes ufo and beam, rotates cow
     ufo = pygame.transform.scale(ufo, (100, 50))
     beam = pygame.transform.scale(beam, (150, 135))
     cow = pygame.transform.rotate(cow, -20)
 
 
-#### end initUFO() ####
+# end initUFO() #
 
 
 
-#### INITIALIZES ROCKET ####
+# INITIALIZES ROCKET
 def initRocket():
     global rx
     global ry
@@ -100,11 +105,11 @@ def initRocket():
     rocket = pygame.image.load("rocket.png")
     rocket = pygame.transform.scale(rocket, (750, 500))
 
-#### end initRocket ####
+# end initRocket
 
 
 
-#### MOVES ROCKET ####
+# MOVES ROCKET
 def moveRocket():
     global rx
     global rocket
@@ -116,10 +121,10 @@ def moveRocket():
     rx = rx + actNorm[iterator]
     screen.blit(rocket,(rx,ry))    # x = -300 to 525
 
-#### end moveRocket ####
+# end moveRocket
 
 
-#### MOVES UFO, BEAM, COW ####
+# MOVES UFO, BEAM, COW
 def moveUFO():
     global ufo
     global beam
@@ -131,34 +136,32 @@ def moveUFO():
     global cy
     global BackGround
 
-    ###### MOVES UFO and BEAM : ######
+    # MOVES UFO and BEAM :
 
     pressed = pygame.key.get_pressed()
     if pressed[pygame.K_LEFT]:
-        if x==172: x=x                          ### left bound
+        if x==172: x=x                          # left bound
         else:
             x -= 43
-            bx -= 43                            ### left arrow key moves left
+            bx -= 43                            # left arrow key moves left
     if pressed[pygame.K_RIGHT]:
-        if x==screen.get_width()-140: x = x     ### right bound
+        if x==screen.get_width()-140: x = x     # right bound
         else:
             x += 43
-            bx += 43                            ### right arrow key moves right
+            bx += 43                            # right arrow key moves right
 
 
-    moveCow() # moves cow with beam
+    moveCow()  # moves cow with beam
 
-        ### prints ufo and beam on screen ###
+    # prints ufo and beam on screen
     screen.blit(ufo,(x,y))
     if cy > -319:
         screen.blit(beam,(bx,by))
 
-
-#### end moveUFO ####
-
+# end moveUFO
 
 
-#### MOVES COW HORIZONTALLY AND VERTICALLY ####
+# MOVES COW HORIZONTALLY AND VERTICALLY
 def moveCow():
     global x
     global cy
@@ -172,10 +175,10 @@ def moveCow():
     if rx+300>x:
         screen.blit(cow,(x-520,cy))
 
-#### end moveCow ####
+# end moveCow
 
 
-#### INITIALIZE SHINING STARS ####
+# INITIALIZE SHINING STARS
 def initShiningStars():
     global shinyStars
     shinyStars = pygame.image.load("yellowstars.png")
@@ -183,10 +186,10 @@ def initShiningStars():
     global whiteStars
     whiteStars = pygame.image.load("whitestars.png")
 
-#### end initShiningStars ####
+# end initShiningStars
 
 
-#### SHINING STARS ####
+# SHINING STARS
 def shiningStars():
     global cy
     global shinyStars
@@ -195,19 +198,19 @@ def shiningStars():
     if cy <= -319:
         screen.blit(shinyStars,[0,0])
 
-#### end shiningStars ####
+# end shiningStars
 
 
 
-#### COLLECT EMG DATA ####
+# COLLECT EMG DATA
 def collectEMG():
     # times = [];
     actLevels = [];
 
     with open('RMS_EMG.txt') as f:
       for line in f:
-        line = line.split(',') # split each line into an array
-        line[1] = line[1].rstrip() # deletes \n at end of string
+        line = line.split(',')  # split each line into an array
+        line[1] = line[1].rstrip()  # deletes \n at end of string
         time = float(line[0])
         actLev = float(line[1])
         # times.append(time)
@@ -216,8 +219,8 @@ def collectEMG():
     minAct = min(actLevels)
     maxAct = max(actLevels)
 
-    ### initialize target with first max
-    ### first max at about 100 seconds
+    # initialize target with first max
+    # first max at about 100 seconds
 
     global actNorm
     actNorm = []
