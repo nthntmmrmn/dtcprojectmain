@@ -1,74 +1,232 @@
 import pygame
 import os, sys
+import time
 from pygame.locals import*
+
+class Background(pygame.sprite.Sprite):
+    def __init__(self, image_file, location):
+        pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
+        self.image = pygame.image.load(image_file)
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = location
 
 #### MAIN FUNCTION THAT RUNS THE GAME ####
 def main():
-
     pygame.init()
-    screen = pygame.display.set_mode((800, 600)) ### creates screen
+    global screen
+    screen = pygame.display.set_mode((1000, 600)) ### creates screen
+    global done
     done = False
+    clock = pygame.time.Clock()     # makes a constant fps of 60
+    clock.tick(60)                 # sets fps
 
-    clock = pygame.time.Clock() # makes a constant fps of 60
+    global iterator
+    iterator = 0
 
+    global BackGround
+    BackGround = Background('backgroundfix3.png', [0,0])
 
-    ufo = pygame.image.load("ufo.png")      ### ufo image
-    beam = pygame.image.load("beam.png")    ### beam image
+    initShiningStars()
+    initUFO()
+    initRocket()
+    collectEMG()
+    global actNorm
 
-    ### lowers opacity of beam ###
-    def blit_alpha(target, source, location, opacity):
-            xl = location[0]
-            yl = location[1]
-            temp = pygame.Surface((source.get_width(), source.get_height())).convert()
-            temp.blit(target, (x, by))
-            temp.blit(source, (0, 0))
-            temp.set_alpha(opacity)
-            target.blit(temp, location)
-
-    ### initial pos of ufo ###
-    x = 100
-    y = 100
-
-    ### y pos of beam ###
-    by = 150
-
-    ###### RUNS PROGRAM UNTIL QUIT ######
-
+        ###### RUNS PROGRAM UNTIL QUIT ######
     while not done:
             for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                             done = True
 
-    ###### MOVES UFO and BEAM : ######
+            screen.fill([255, 255, 255])
+            screen.blit(BackGround.image, BackGround.rect)
 
-            pressed = pygame.key.get_pressed()
-            if pressed[pygame.K_LEFT]:
-                if x==100: x=x      ### left bound
-                else: x -= 4        ### left arrow key moves left
-            if pressed[pygame.K_RIGHT]:
-                if x==600: x = x    ### right bound
-                else: x += 4        ### right arrow key moves right
+            if iterator < len(actNorm)-200:
+                iterator += 167
+            else:
+                iterator = 0
 
-            ### makes background black ###
-            screen.fill((0, 0, 0))
-
-            ### resizes ufo and beam ###
-            ufo = pygame.transform.scale(ufo, (100, 50))
-            beam = pygame.transform.scale(beam, (100, 200))
-
-            ### prints images on screen ###
-            screen.blit(ufo,(x,y))
-            screen.blit(ufo,(400,325))
-            blit_alpha(screen, beam, (x, by), 80)
+            shiningStars()
+            moveRocket()
+            moveUFO()
 
             pygame.display.flip()       # creates display
-            clock.tick(240)              # sets fps
             pygame.display.update()     # updates display
+
+#### end main() ####
+
+
+#### INITIALIZES UFO, BEAM, AND COW####
+def initUFO():
+    global x    ### initial pos of ufo
+    global y
+
+    x = 172
+    y = 100
+
+    global by   ### init pos of beam and cow
+    global bx
+    global cy
+
+    bx = 75+72
+    by = 150
+    cy = -185
+
+    global ufo
+    ufo = pygame.image.load("ufo.png")      ### ufo image
+    global beam
+    beam = pygame.image.load("beam.png")    ### beam image
+    global cow
+    cow = pygame.image.load("cow.png")      ### cow image
+
+
+    ### resizes ufo and beam, rotates cow ###
+    ufo = pygame.transform.scale(ufo, (100, 50))
+    beam = pygame.transform.scale(beam, (150, 135))
+    cow = pygame.transform.rotate(cow, -20)
+
+
+#### end initUFO() ####
+
+
+
+#### INITIALIZES ROCKET ####
+def initRocket():
+    global rx
+    global ry
+    rx = -300
+    ry = 50
+    global rocket
+    rocket = pygame.image.load("rocket.png")
+    rocket = pygame.transform.scale(rocket, (750, 500))
+
+#### end initRocket ####
+
+
+
+#### MOVES ROCKET ####
+def moveRocket():
+    global rx
+    global rocket
+    global ry
+    global actNorm
+    global iterator
+
+    rx = -300
+    rx = rx + actNorm[iterator]
+    screen.blit(rocket,(rx,ry))    # x = -300 to 525
+
+#### end moveRocket ####
+
+
+#### MOVES UFO, BEAM, COW ####
+def moveUFO():
+    global ufo
+    global beam
+    global cow
+    global x
+    global y
+    global bx
+    global by
+    global cy
+    global BackGround
+
+    ###### MOVES UFO and BEAM : ######
+
+    pressed = pygame.key.get_pressed()
+    if pressed[pygame.K_LEFT]:
+        if x==172: x=x                          ### left bound
+        else:
+            x -= 43
+            bx -= 43                            ### left arrow key moves left
+    if pressed[pygame.K_RIGHT]:
+        if x==screen.get_width()-140: x = x     ### right bound
+        else:
+            x += 43
+            bx += 43                            ### right arrow key moves right
+
+
+
+    ### prints ufo and beam on screen ###
+    moveCow()                   # moves cow with beam
+    screen.blit(ufo,(x,y))
+    if cy > -319:
+        screen.blit(beam,(bx,by))
+
+
+#### end moveUFO ####
+
+
+
+#### MOVES COW HORIZONTALLY AND VERTICALLY ####
+def moveCow():
+    global x
+    global cy
+    global rx
+
+    if cy >= -320 and rx+300>x:
+        cy -= 1
+    if rx+300 < x:
+        cy = -185
+
+    if rx+300>x:
+        screen.blit(cow,(x-520,cy))
+
+#### end moveCow ####
+
+
+#### INITIALIZE SHINING STARS ####
+def initShiningStars():
+    global shinyStars
+    shinyStars = pygame.image.load("yellowstars.png")
+
+    global whiteStars
+    whiteStars = pygame.image.load("whitestars.png")
+
+#### end initShiningStars
+
+
+#### SHINING STARS ####
+def shiningStars():
+    global cy
+    global shinyStars
+    global whiteStars
+
+    if cy <= -319:
+        screen.blit(shinyStars,[0,0])
+
+#### end shiningStars ####
+
+
+
+#### COLLECT EMG DATA ####
+def collectEMG():
+    # times = [];
+    actLevels = [];
+
+    with open('RMS_EMG.txt') as f:
+      for line in f:
+        line = line.split(',') # split each line into an array
+        line[1] = line[1].rstrip() # deletes \n at end of string
+        time = float(line[0])
+        actLev = float(line[1])
+        # times.append(time)
+        actLevels.append(actLev)
+
+    minAct = min(actLevels)
+    maxAct = max(actLevels)
+
+    global actNorm
+    actNorm = []
+
+    for i in range(len(actLevels)):
+        normAct = ((actLevels[i]-minAct) / (maxAct-minAct))*825
+
+        actNorm.append(normAct)
+
 
 
 ### starts game ###
 main()
 
-		### NOTES ###
-		# KEYDOWN : move UFO
-		# KEYUP : update variable when key let go
+
