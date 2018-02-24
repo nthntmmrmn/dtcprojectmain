@@ -3,33 +3,74 @@ import os, sys
 import time
 from pygame.locals import*
 
-class Background(pygame.sprite.Sprite):
-    def __init__(self, image_file, location):
-        pygame.sprite.Sprite.__init__(self)  # call Sprite initializer
-        self.image = pygame.image.load(image_file)
-        self.rect = self.image.get_rect()
-        self.rect.left, self.rect.top = location
+# class Background(pygame.sprite.Sprite):
+#     def __init__(self, image_file, location):
+#         pygame.sprite.Sprite.__init__(self)  # call Sprite initializer
+#         self.image = pygame.image.load(image_file)
+#         self.rect = self.image.get_rect()
+#         self.rect.left, self.rect.top = location
 
 # MAIN FUNCTION THAT RUNS THE GAME
 def main():
     pygame.init()
-    global screen
-    print(pygame.display.Info())
+    pygame.display.set_caption('Space Mission')
+
+    global infoObject
     infoObject = pygame.display.Info()
+    pygame.HWSURFACE
+
+    global screen
     screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h))
-    # screen = pygame.display.set_mode((1000, 600)) # creates screen
+
     global done
     done = False
     clock = pygame.time.Clock()     # makes a constant fps of 60
     clock.tick(60)                  # sets fps
 
-
-
     global iterator
     iterator = 0
 
-    global BackGround
-    BackGround = Background('backgroundfix3.png', [0,0])
+    global moveDist
+    moveDist = (((infoObject.current_w / 5) * 5 - 130) - (infoObject.current_w / 5 - 100)) / 80
+
+    # planets
+    earth = pygame.image.load("earthDTC.png")
+    earth = pygame.transform.scale(earth, (300, 300))
+    mars = pygame.image.load("marsDTC.png")
+    mars = pygame.transform.scale(mars, (100, 100))
+    jupiter = pygame.image.load("jupiterDTC.png")
+    jupiter = pygame.transform.scale(jupiter, (100, 100))
+    saturn = pygame.image.load("saturnDTC.png")
+    saturn = pygame.transform.scale(saturn, (160, 100))
+    uranus = pygame.image.load("uranusDTC.png")
+    uranus = pygame.transform.scale(uranus, (100, 100))
+    neptune = pygame.image.load("neptuneDTC.png")
+    neptune = pygame.transform.scale(neptune, (100, 100))
+
+    # cows
+    global marsCow
+    marsCow = pygame.image.load("marscowDTC.png")
+    marsCow = pygame.transform.scale(marsCow, [40, 40])
+
+    global jupiterCow
+    jupiterCow = pygame.image.load("jupitercowDTC.png")
+    jupiterCow = pygame.transform.scale(jupiterCow, [40, 40])
+
+    global saturnCow
+    saturnCow = pygame.image.load("saturncowDTC.png")
+    saturnCow = pygame.transform.scale(saturnCow, [40, 40])
+
+    global uranusCow
+    uranusCow = pygame.image.load("uranuscowDTC.png")
+    uranusCow = pygame.transform.scale(uranusCow, [40, 40])
+
+    global neptuneCow
+    neptuneCow = pygame.image.load("neptunecowDTC.png")
+    neptuneCow = pygame.transform.scale(neptuneCow, [40, 40])
+
+    global spaceCow
+    spaceCow = pygame.image.load("spacecowDTC.png")
+    spaceCow = pygame.transform.scale(spaceCow, [40, 40])
 
     initShiningStars()
     initUFO()
@@ -37,14 +78,23 @@ def main():
     collectEMG()
     global actNorm
 
+    global percentage
+    percentage = 20
+
     # RUNS PROGRAM UNTIL QUIT
     while not done:
             for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                             done = True
 
-            screen.fill([255, 255, 255])
-            screen.blit(BackGround.image, BackGround.rect)
+            screen.fill([0, 0, 0])
+            # screen.blit(BackGround.image, BackGround.rect)
+            screen.blit(earth, [-250, infoObject.current_h/2-150])
+            screen.blit(mars, [infoObject.current_w /5 - 100, infoObject.current_h/2-50])
+            screen.blit(jupiter, [(infoObject.current_w/5)*2 - 100 - .5*moveDist, infoObject.current_h / 2 - 50])
+            screen.blit(saturn, [(infoObject.current_w / 5) * 3 - 130 - moveDist, infoObject.current_h / 2 - 50])
+            screen.blit(uranus, [(infoObject.current_w / 5) * 4 - 130 + .5*moveDist, infoObject.current_h / 2 - 50])
+            screen.blit(neptune, [(infoObject.current_w / 5) * 5 - 130, infoObject.current_h / 2 - 50])
 
             if iterator < len(actNorm)-200:
                 iterator += 167
@@ -55,10 +105,17 @@ def main():
             moveRocket()
             moveUFO()
 
+            texts(percentage)
             pygame.display.flip()       # creates display
             pygame.display.update()     # updates display
 
 # end main() #
+
+
+def texts(percent):
+    font = pygame.font.Font(None, 30)
+    scoretext = font.render(str(percent)+'%', 1, (255, 255, 255))
+    screen.blit(scoretext, (x+30, y))
 
 
 # INITIALIZES UFO, BEAM, AND COW
@@ -66,48 +123,42 @@ def initUFO():
     global x    # initial pos of ufo
     global y
 
-    x = 172
-    y = 100
+    x = infoObject.current_w /5 - 100 # above mars
+    y = infoObject.current_h/5
 
     global by   # init pos of beam and cow
     global bx
     global cy
 
-    bx = 75+72
-    by = 150
-    cy = -185
+    cy = infoObject.current_h/2 - 60
+    bx = infoObject.current_w/5 - 123
+    by = infoObject.current_h/5 + 72
+
 
     global ufo
-    ufo = pygame.image.load("ufo.png")      # ufo image
+    ufo = pygame.image.load("ufoDTC.png")      # ufo image
     global beam
-    beam = pygame.image.load("beam.png")    # beam image
-    global cow
-    cow = pygame.image.load("cow.png")      # cow image
+    beam = pygame.image.load("beamDTC.png")    # beam image
 
-
-    # resizes ufo and beam, rotates cow
-    ufo = pygame.transform.scale(ufo, (100, 50))
-    beam = pygame.transform.scale(beam, (150, 135))
-    cow = pygame.transform.rotate(cow, -20)
+    # re-sizes ufo and beam, rotates cow
+    ufo = pygame.transform.scale(ufo, (100, 100))
+    beam = pygame.transform.scale(beam, (150, int(round(infoObject.current_h/2-50 - infoObject.current_h/5))-20))
+    # cow = pygame.transform.rotate(cow, -20)
 
 
 # end initUFO() #
-
-
 
 # INITIALIZES ROCKET
 def initRocket():
     global rx
     global ry
-    rx = -300
-    ry = 50
+    rx = -100
+    ry = infoObject.current_h/2-50
     global rocket
-    rocket = pygame.image.load("rocket.png")
-    rocket = pygame.transform.scale(rocket, (750, 500))
+    rocket = pygame.image.load("rocketDTC.png")
+    rocket = pygame.transform.scale(rocket, (100, 100))
 
 # end initRocket
-
-
 
 # MOVES ROCKET
 def moveRocket():
@@ -117,12 +168,11 @@ def moveRocket():
     global actNorm
     global iterator
 
-    rx = -300
+    rx = -50
     rx = rx + actNorm[iterator]
     screen.blit(rocket,(rx,ry))    # x = -300 to 525
 
 # end moveRocket
-
 
 # MOVES UFO, BEAM, COW
 def moveUFO():
@@ -135,56 +185,85 @@ def moveUFO():
     global by
     global cy
     global BackGround
+    global percentage
 
     # MOVES UFO and BEAM :
 
     pressed = pygame.key.get_pressed()
     if pressed[pygame.K_LEFT]:
-        if x==172: x=x                          # left bound
+        if x == infoObject.current_w /5 - 100:
+            x = x
+            percentage = percentage  # left bound
         else:
-            x -= 43
-            bx -= 43                            # left arrow key moves left
+            x -= moveDist
+            bx -= moveDist
+            percentage -= 1  # left arrow key moves left
     if pressed[pygame.K_RIGHT]:
-        if x==screen.get_width()-140: x = x     # right bound
+        if x > infoObject.current_w - 125 - moveDist:
+            x = x     # right bound
+            percentage = percentage
         else:
-            x += 43
-            bx += 43                            # right arrow key moves right
+            x += moveDist
+            bx += moveDist
+            percentage += 1  # right arrow key moves right
 
-
-    moveCow()  # moves cow with beam
-
+    moveCows()  # moves cow with beam
     # prints ufo and beam on screen
-    screen.blit(ufo,(x,y))
-    if cy > -319:
-        screen.blit(beam,(bx,by))
+    # cy = infoObject.current_h / 2 - 60
+    screen.blit(ufo, (x, y))
+    if cy > y + 35:
+        screen.blit(beam, (bx, by))
 
 # end moveUFO
 
 
 # MOVES COW HORIZONTALLY AND VERTICALLY
-def moveCow():
+def moveCows():
     global x
     global cy
     global rx
+    global percentage
+    global cx
 
-    if cy >= -320 and rx+300>x:
-        cy -= 1
-    if rx+300 < x:
-        cy = -185
+    cx = x + 33
 
-    if rx+300>x:
-        screen.blit(cow,(x-520,cy))
+    if percentage <= 23 and rx > cx:
+        screen.blit(marsCow, (cx, cy))
+        if cy > y + 35:
+            cy -= 1
+    elif percentage >= 37 and percentage <= 43 and rx > cx:
+        screen.blit(jupiterCow, (cx, cy))
+        if cy > y + 35:
+            cy -= 1
+    elif percentage >= 57 and percentage <= 63 and rx > cx:
+        screen.blit(saturnCow, (cx, cy))
+        if cy > y+35:
+            cy -= 1
+    elif percentage >= 77 and percentage <= 83 and rx > cx:
+        screen.blit(uranusCow, (cx, cy))
+        if cy > y+35:
+            cy -= 1
+    elif percentage >= 97 and rx > cx:
+        screen.blit(neptuneCow, (cx, cy))
+    elif rx > cx:
+        screen.blit(spaceCow, (cx, cy))
+        if cy > y+35:
+            cy -= 1
+    else:
+        cy = infoObject.current_h/2 - 60
 
-# end moveCow
+# end moveCows
 
 
 # INITIALIZE SHINING STARS
 def initShiningStars():
-    global shinyStars
-    shinyStars = pygame.image.load("yellowstars.png")
+    global goldStars
+    goldStars = pygame.image.load("goldstarsDTC.png")
+    goldStars = pygame.transform.scale(goldStars, [infoObject.current_w, infoObject.current_h])
 
     global whiteStars
-    whiteStars = pygame.image.load("whitestars.png")
+    whiteStars = pygame.image.load("whitestarsDTC.png")
+    whiteStars = pygame.transform.scale(whiteStars, [infoObject.current_w, infoObject.current_h])
 
 # end initShiningStars
 
@@ -195,11 +274,12 @@ def shiningStars():
     global shinyStars
     global whiteStars
 
-    if cy <= -319:
-        screen.blit(shinyStars,[0,0])
+    if cy > y+35:
+        screen.blit(whiteStars,[0, 0])
+    else:
+        screen.blit(goldStars, [0, 0])
 
 # end shiningStars
-
 
 
 # COLLECT EMG DATA
@@ -226,13 +306,15 @@ def collectEMG():
     actNorm = []
 
     for i in range(len(actLevels)):
-        normAct = ((actLevels[i]-minAct) / (maxAct-minAct))*825
+        normAct = ((actLevels[i]-minAct) / (maxAct-minAct))*((infoObject.current_w / 5) * 5 - 125)
 
         actNorm.append(normAct)
+# end collectEMG
 
 
-
-### starts game ###
+# starts game
 main()
 
-
+# change so fits to screen
+# add different cows at each planet
+# how to show target met between planets?
