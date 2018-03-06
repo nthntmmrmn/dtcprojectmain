@@ -3,37 +3,122 @@ import os, sys
 import time
 from pygame.locals import*
 
-# class Background(pygame.sprite.Sprite):
-#     def __init__(self, image_file, location):
-#         pygame.sprite.Sprite.__init__(self)  # call Sprite initializer
-#         self.image = pygame.image.load(image_file)
-#         self.rect = self.image.get_rect()
-#         self.rect.left, self.rect.top = location
+# starts game
+
 
 # MAIN FUNCTION THAT RUNS THE GAME
 def main():
+
+    # initializes screen
     pygame.init()
-    pygame.display.set_caption('Space Mission')
+    pygame.display.set_caption('COWSMONAUT')
 
     global infoObject
+    # finds size of computer screen
     infoObject = pygame.display.Info()
     pygame.HWSURFACE
 
     global screen
     screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h))
 
-    global done
-    done = False
-    clock = pygame.time.Clock()     # makes a constant fps of 60
-    clock.tick(60)                  # sets fps
+    global countCows
+    countCows = 0
 
+    global pressed
+
+    global doneStartScreen
+    global doneDisplay
+    global recordDone
+    recordDone = False
+    doneStartScreen = False
+    doneDisplay = False
+
+    mainData()
+    recorded()
+    collectEMG()
+    mainDisplay()
+
+# end main
+
+
+# runs the data functions
+def mainData():
+    global doneStartScreen
+    global doneDisplay
+    global recordDone
+
+
+    # loads and scales images
+    global recordMaximum
+    recordMaximum = pygame.image.load("directionsv2.png")
+    recordMaximum = pygame.transform.scale(recordMaximum, [infoObject.current_w, infoObject.current_h])
+
+    global recordingNotif
+    recordingNotif = pygame.image.load("recording.png")
+    recordingNotif = pygame.transform.scale(recordingNotif, [500, 300])
+
+    global recordedNotif
+    recordedNotif = pygame.image.load("recorded.png")
+    recordedNotif = pygame.transform.scale(recordedNotif, [500, 300])
+
+    # runs until key pressed
+    while not doneStartScreen:
+        screen.fill([0, 0, 0])
+        screen.blit(recordMaximum, [0, 0-50])
+        pygame.display.flip()  # creates display
+        pygame.display.update()  # updates display
+
+        pressed = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                doneStartScreen = True
+                doneDisplay = True
+                recordDone = True;
+            if pressed[pygame.K_r]:
+                recordingMax()
+                doneStartScreen = True
+
+# end mainData
+
+
+# runs the display functions
+def mainDisplay():
+    pygame.init()
+    pygame.display.set_caption('COWSMONAUT')
+
+    global doneStartScreen
+    global doneDisplay
+    global recordDone
+
+    global infoObject
+    pygame.HWSURFACE
+
+    # sets display size to size of screen
+    global screen
+    screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h))
+
+    clock = pygame.time.Clock()     # makes a constant fps
+    clock.tick(60)                  # sets fps at 60
+
+
+    # loads and scales images
+    global recordMax
+    recordMax = pygame.image.load("directionsv2.png")
+    recordMax = pygame.transform.scale(recordMax, [infoObject.current_w, infoObject.current_h])
+
+    global recordingNotif
+    recordingNotif = pygame.image.load("recording.png")
+    recordingNotif = pygame.transform.scale(recordingNotif, [500, 300])
+
+    # iterates over data in data array
     global iterator
     iterator = 0
 
+    # calculates distance rocket must move
     global moveDist
     moveDist = (((infoObject.current_w / 5) * 5 - 130) - (infoObject.current_w / 5 - 100)) / 80
 
-    # planets
+    # loads and scales planet images
     earth = pygame.image.load("earthDTC.png")
     earth = pygame.transform.scale(earth, (300, 300))
     mars = pygame.image.load("marsDTC.png")
@@ -47,7 +132,7 @@ def main():
     neptune = pygame.image.load("neptuneDTC.png")
     neptune = pygame.transform.scale(neptune, (100, 100))
 
-    # cows
+    # loads and scales cow images
     global marsCow
     marsCow = pygame.image.load("marscowDTC.png")
     marsCow = pygame.transform.scale(marsCow, [40, 40])
@@ -72,23 +157,38 @@ def main():
     spaceCow = pygame.image.load("spacecowDTC.png")
     spaceCow = pygame.transform.scale(spaceCow, [40, 40])
 
+    # runs functions
     initShiningStars()
     initUFO()
     initRocket()
-    collectEMG()
     global actNorm
 
     global percentage
     percentage = 20
 
-    # RUNS PROGRAM UNTIL QUIT
-    while not done:
+    global countCows
+    global countPass
+    countPass = 0
+
+    global temp_x
+    global temp_ind
+    temp_x = 0
+    temp_ind = 0
+
+
+    # RUNS DISPLAY PROGRAM UNTIL QUIT
+    while not doneDisplay:
+            pressed = pygame.key.get_pressed()
             for event in pygame.event.get():
+                    if pressed[pygame.K_c]:
+                        countCows = 0
+                        countPass = 0
                     if event.type == pygame.QUIT:
-                            done = True
+                            doneDisplay = True
+                            recordDone = True
+                            doneStartScreen = True
 
             screen.fill([0, 0, 0])
-            # screen.blit(BackGround.image, BackGround.rect)
             screen.blit(earth, [-250, infoObject.current_h/2-150])
             screen.blit(mars, [infoObject.current_w /5 - 100, infoObject.current_h/2-50])
             screen.blit(jupiter, [(infoObject.current_w/5)*2 - 100 - .5*moveDist, infoObject.current_h / 2 - 50])
@@ -96,69 +196,161 @@ def main():
             screen.blit(uranus, [(infoObject.current_w / 5) * 4 - 130 + .5*moveDist, infoObject.current_h / 2 - 50])
             screen.blit(neptune, [(infoObject.current_w / 5) * 5 - 130, infoObject.current_h / 2 - 50])
 
+            global maxAct
+            global rx
+            global cx
+
+            # asks to resets scale if initial max exceeded
+            if rx > (infoObject.current_w / 5) * 5 - 130:
+                if rx > temp_x:
+                    temp_x = rx
+                    temp_ind = iterator
+
+            if temp_x > (infoObject.current_w / 5) * 5 - 130 and actLevels[temp_ind] > maxAct:
+                texts5()
+                if maxAct < actLevels[temp_ind]:
+                    if pressed[pygame.K_y]:
+                        resetScale()
+                        maxAct = actLevels[temp_ind]
+                        temp_x = 0
+                    if pressed[pygame.K_n]:
+                        temp_x = 0
+
+            # iterates over data array at interval that fits 60 frames per second
+            global it_last
+            it_last = iterator
             if iterator < len(actNorm)-200:
                 iterator += 167
             else:
                 iterator = 0
 
+            # runs functions
             shiningStars()
             moveRocket()
             moveUFO()
 
+            # prints text
             texts(percentage)
+            texts2(countCows)
+            texts3()
+            texts4(maxAct)
+            texts6(countPass)
+
+            # adds to target passed counter
+            if rx_last < cx and rx > cx:
+                countPass += 1
+
+            # display
             pygame.display.flip()       # creates display
             pygame.display.update()     # updates display
 
-# end main() #
+# end mainDisplay
 
 
+# defines text for percentage
 def texts(percent):
     font = pygame.font.Font(None, 30)
     scoretext = font.render(str(percent)+'%', 1, (255, 255, 255))
+
+    # prints on screen
     screen.blit(scoretext, (x+30, y))
+
+# defines text for cows captured
+def texts2(cows):
+    font = pygame.font.Font(None, 30)
+    if cows == 1:
+        scoretext = font.render(str(cows) + " cow captured!", 1, (255, 255, 255))
+    else:
+        scoretext = font.render(str(cows)+" cows captured!", 1, (255, 255, 255))
+
+    # prints on screen
+    screen.blit(scoretext, (infoObject.current_w / 2 - 100, infoObject.current_h / 2 + 100))
+
+
+# defines text for the prompt to reset cow counter and target passed counter
+def texts3():
+    font = pygame.font.Font(None, 25)
+    scoretext = font.render("(press 'c' to reset) ", 1, (255, 255, 255))
+
+    # prints on screen
+    screen.blit(scoretext, (infoObject.current_w / 2 - 90, infoObject.current_h / 2 + 160))
+
+
+# defines text for the number of times target passed
+def texts6(passTarget):
+    font = pygame.font.Font(None, 25)
+    scoretext = font.render("Times target reached: "+str(passTarget), 1, (255, 255, 255))
+
+    # prints on screen
+    screen.blit(scoretext, (infoObject.current_w / 2 - 110, infoObject.current_h / 2 + 130))
+
+
+# defines text for the max output
+def texts4(max):
+    global maxAct
+    font = pygame.font.Font(None, 20)
+    scoretext = font.render("max: "+str(max)+" mV", 1, (255, 255, 255))
+
+    # prints on screen
+    screen.blit(scoretext, ((infoObject.current_w / 5) * 5 - 150, infoObject.current_h / 2 + 75))
+
+
+# defines text for prompt asking if max scale should be changed if passed
+def texts5():
+    global maxAct
+    font = pygame.font.Font(None, 20)
+    scoretext = font.render("Max has been surpassed. Rescale? ('y' or 'n')", 1, (255, 255, 255))
+
+    # prints on screen
+    screen.blit(scoretext, (infoObject.current_w - 300, infoObject.current_h / 2 + 125))
 
 
 # INITIALIZES UFO, BEAM, AND COW
 def initUFO():
-    global x    # initial pos of ufo
-    global y
+    global x    # ufo x pos
+    global y    # ufo y pos
 
-    x = infoObject.current_w /5 - 100 # above mars
+    x = infoObject.current_w /5 - 100   # places UFO above mars to start
     y = infoObject.current_h/5
 
-    global by   # init pos of beam and cow
-    global bx
-    global cy
+    global by   # beam x pos
+    global bx   # beam y pos
+    global cy   # cow y pos
 
-    cy = infoObject.current_h/2 - 60
+    cy = infoObject.current_h/2 - 60    # places pieces correctly
     bx = infoObject.current_w/5 - 123
     by = infoObject.current_h/5 + 72
 
 
     global ufo
-    ufo = pygame.image.load("ufoDTC.png")      # ufo image
+    ufo = pygame.image.load("ufoDTC.png")      # loads ufo image
     global beam
-    beam = pygame.image.load("beamDTC.png")    # beam image
+    beam = pygame.image.load("beamDTC.png")    # loads beam image
 
-    # re-sizes ufo and beam, rotates cow
-    ufo = pygame.transform.scale(ufo, (100, 100))
+    ufo = pygame.transform.scale(ufo, (100, 100))   # scales UFO
+
+    # scales beam
     beam = pygame.transform.scale(beam, (150, int(round(infoObject.current_h/2-50 - infoObject.current_h/5))-20))
-    # cow = pygame.transform.rotate(cow, -20)
 
+# end initUFO
 
-# end initUFO() #
 
 # INITIALIZES ROCKET
 def initRocket():
-    global rx
-    global ry
+    global rx   # rocket x pos
+    global ry   # rocket y pos
+
+    # init rocket pos
     rx = -100
     ry = infoObject.current_h/2-50
+
+    # loads and scales rocket image
     global rocket
     rocket = pygame.image.load("rocketDTC.png")
     rocket = pygame.transform.scale(rocket, (100, 100))
 
 # end initRocket
+
 
 # MOVES ROCKET
 def moveRocket():
@@ -167,12 +359,17 @@ def moveRocket():
     global ry
     global actNorm
     global iterator
+    global rx_last
 
-    rx = -50
-    rx = rx + actNorm[iterator]
-    screen.blit(rocket,(rx,ry))    # x = -300 to 525
+    rx = -50    # init rocket pos
+    rx_last = rx + actNorm[iterator-167]
+    rx = rx + actNorm[iterator]     # moves rocket w/ emg data
+
+    # prints rocket on screen
+    screen.blit(rocket, (rx, ry))    # x = -300 to 525
 
 # end moveRocket
+
 
 # MOVES UFO, BEAM, COW
 def moveUFO():
@@ -190,29 +387,33 @@ def moveUFO():
     # MOVES UFO and BEAM :
 
     pressed = pygame.key.get_pressed()
-    if pressed[pygame.K_LEFT]:
-        if x == infoObject.current_w /5 - 100:
+    if pressed[pygame.K_LEFT]:                   # left arrow key moves left
+        if x <= infoObject.current_w /5 - 100:   # left bound
             x = x
-            percentage = percentage  # left bound
-        else:
-            x -= moveDist
-            bx -= moveDist
-            percentage -= 1  # left arrow key moves left
-    if pressed[pygame.K_RIGHT]:
-        if x > infoObject.current_w - 125 - moveDist:
-            x = x     # right bound
             percentage = percentage
         else:
-            x += moveDist
-            bx += moveDist
-            percentage += 1  # right arrow key moves right
+            x -= moveDist       # moves ufo
+            bx -= moveDist      # moves beam
+            percentage -= 1     # increments percentage
+    if pressed[pygame.K_RIGHT]:                         # right arrow key moves right
+        if x > infoObject.current_w - 125 - moveDist:   # right bound
+            x = x
+            percentage = percentage
+        else:
+            x += moveDist       # moves ufo
+            bx += moveDist      # moves beam
+            percentage += 1     # increments percentage
 
     moveCows()  # moves cow with beam
-    # prints ufo and beam on screen
-    # cy = infoObject.current_h / 2 - 60
+
+    # keeps track of how many cows captured
+    global countCows
     screen.blit(ufo, (x, y))
     if cy > y + 35:
         screen.blit(beam, (bx, by))
+    else:
+        cy = infoObject.current_h/2 - 60
+        countCows += 1
 
 # end moveUFO
 
@@ -225,30 +426,33 @@ def moveCows():
     global percentage
     global cx
 
-    cx = x + 33
+    cx = x + 33     # init cow pos
 
+    # moves cow if past target
     if percentage <= 23 and rx > cx:
         screen.blit(marsCow, (cx, cy))
         if cy > y + 35:
-            cy -= 1
+            cy -= 1.7
     elif percentage >= 37 and percentage <= 43 and rx > cx:
         screen.blit(jupiterCow, (cx, cy))
         if cy > y + 35:
-            cy -= 1
+            cy -= 1.7
     elif percentage >= 57 and percentage <= 63 and rx > cx:
         screen.blit(saturnCow, (cx, cy))
         if cy > y+35:
-            cy -= 1
+            cy -= 1.7
     elif percentage >= 77 and percentage <= 83 and rx > cx:
         screen.blit(uranusCow, (cx, cy))
         if cy > y+35:
-            cy -= 1
+            cy -= 1.7
     elif percentage >= 97 and rx > cx:
         screen.blit(neptuneCow, (cx, cy))
+        if cy > y+35:
+            cy -= 1.7
     elif rx > cx:
         screen.blit(spaceCow, (cx, cy))
         if cy > y+35:
-            cy -= 1
+            cy -= 1.7
     else:
         cy = infoObject.current_h/2 - 60
 
@@ -257,6 +461,8 @@ def moveCows():
 
 # INITIALIZE SHINING STARS
 def initShiningStars():
+    # loads and scales stars
+
     global goldStars
     goldStars = pygame.image.load("goldstarsDTC.png")
     goldStars = pygame.transform.scale(goldStars, [infoObject.current_w, infoObject.current_h])
@@ -270,8 +476,10 @@ def initShiningStars():
 
 # SHINING STARS
 def shiningStars():
+    # shines stars
+
     global cy
-    global shinyStars
+    global goldStars
     global whiteStars
 
     if cy > y+35:
@@ -284,37 +492,112 @@ def shiningStars():
 
 # COLLECT EMG DATA
 def collectEMG():
-    # times = [];
-    actLevels = [];
+    # collects EMG data into an array
+    global doneDisplay
 
-    with open('RMS_EMG.txt') as f:
-      for line in f:
-        line = line.split(',')  # split each line into an array
-        line[1] = line[1].rstrip()  # deletes \n at end of string
-        time = float(line[0])
-        actLev = float(line[1])
-        # times.append(time)
-        actLevels.append(actLev)
+    global actLevels
+    actLevels = []
+    global i
+    if not doneDisplay:
+        with open('Data1.txt') as f:
+            for line in f:
+                line = line.split(',')  # split each line into an array
+                line[1] = line[1].rstrip()  # deletes \n at end of string
+                actLev = float(line[1])
+                actLevels.append(actLev)
 
-    minAct = min(actLevels)
-    maxAct = max(actLevels)
+        global actNorm
+        global maxAct
+        global minAct
+        actNorm = []
 
-    # initialize target with first max
-    # first max at about 100 seconds
+    # normalizes EMG data for scale
+        for i in range(len(actLevels)):
+            normAct = ((actLevels[i] - minAct) / (maxAct - minAct)) * ((infoObject.current_w / 5) * 5 - 130)
 
-    global actNorm
-    actNorm = []
+            actNorm.append(normAct)
 
-    for i in range(len(actLevels)):
-        normAct = ((actLevels[i]-minAct) / (maxAct-minAct))*((infoObject.current_w / 5) * 5 - 125)
-
-        actNorm.append(normAct)
 # end collectEMG
 
 
-# starts game
-main()
+# resets scale if exceed max
+def resetScale():
 
-# change so fits to screen
-# add different cows at each planet
-# how to show target met between planets?
+    global actNorm
+    global maxAct
+    global minAct
+
+    for k in range(len(actNorm)):
+        actNorm[k] = actNorm[k] * (maxAct / actLevels[temp_ind])
+
+# end resetScale
+
+
+# records initial max from first 20 seconds to set scale
+def recordingMax():
+
+    global doneDisplay
+    global doneStartScreen
+    global recordDone
+
+    timesrec = []
+    actLevelsRec = []
+    timerec = 0
+    while timerec < 20:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                doneStartScreen = True
+                doneDisplay = True
+                recordDone = True
+        with open('Data1.txt') as f:
+            for line in f:
+                line = line.split(',')  # split each line into an array
+                line[1] = line[1].rstrip()  # deletes \n at end of string
+                timerec = float(line[0])
+                if timerec == 20:
+                    break
+                actLevRec = float(line[1])
+                timesrec.append(timerec)
+                actLevelsRec.append(actLevRec)
+
+        # creates display
+        screen.fill([0, 0, 0])
+        screen.blit(recordingNotif, [infoObject.current_w / 2 - 500, infoObject.current_h / 2 - 300])
+        pygame.display.flip()
+        pygame.display.update()
+        global minAct
+        global maxAct
+        minAct = min(actLevelsRec)
+        maxAct = max(actLevelsRec)
+
+    return
+
+# end recordingMax
+
+
+# screen that displays once max is recorded
+def recorded():
+
+    global doneDisplay
+    global doneStartScreen
+    global recordDone
+
+    while not recordDone:
+        screen.fill([0, 0, 0])
+        screen.blit(recordedNotif, [infoObject.current_w / 2 - 250, infoObject.current_h / 2 - 150])
+        pygame.display.flip()  # creates display
+        pygame.display.update()  # updates display
+        pressed = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                doneStartScreen = True
+                doneDisplay = True
+                recordDone = True
+            if pressed[pygame.K_RETURN]:
+                recordDone = True
+
+# end recorded
+
+# runs program #
+main()         #
+# runs program #
